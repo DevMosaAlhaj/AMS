@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AMS.Core.Constant;
+using AMS.Core.Dto.CreateDto;
+using AMS.Core.Dto.UpdateDto;
+using AMS.Core.ViewModel;
+using AMS.Infrastructure.Service.SparePartServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AMS.Api.Controllers
+{
+    [Authorize(Roles = UserRole.All)]
+    public class SparePartController : BaseController
+    {
+
+
+        private readonly ISparePartService _service;
+
+        public SparePartController(ISparePartService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet("{page}/{pageSize}")]
+        public async Task<IActionResult> GetAll(int page, int pageSize)
+            => await GetResponse(async (userId) =>
+            new ApiResponseViewModel(true, "GetAll SpareParts Successfully", await _service.GetAll(page, pageSize)));
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+           => await GetResponse(async (userId) =>
+           new ApiResponseViewModel(true, "Get SparePart Successfully", await _service.Get(id)));
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] SparePartCreateDto dto)
+            => await GetResponse(async (userId) =>
+            new ApiResponseViewModel(true, "SparePart Created Successfully", await _service.Create(dto, userId)));
+
+
+
+        [Authorize(Roles = UserRole.SuperAdminOrRegistryOfficer)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromBody] SparePartUpdateDto dto, int id)
+           => await GetResponse(async (userId) =>
+           new ApiResponseViewModel(true, "SparePart Updated Successfully", await _service.Update(dto, id, userId)));
+
+
+        [Authorize(Roles = UserRole.SuperAdmin)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+          => await GetResponse(async (userId) =>
+          new ApiResponseViewModel(true, "SparePart Deleted Successfully", await _service.Delete(id, userId)));
+
+
+    }
+}
